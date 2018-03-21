@@ -74,6 +74,46 @@ Sudoku.prototype.eliminate = function() {
     }
 };
 
+// 判断格子的可能数值里是否是所在数据块里唯一的
+Sudoku.prototype.assign = function() {
+    for (let i = 0; i < 81; i++) {
+        const blk = this._allBlocks[i];
+        if (!blk.isDone) {
+            for (let j = 0; j < blk.probabilities.length;j++) {
+                const num = blk.probabilities[j],
+                    pos = blk.pos();
+
+                checkStructs(this._rows[pos.row], blk, num);
+                checkStructs(this._cols[pos.col], blk, num);
+                checkStructs(this._sqrs[pos.sqr], blk, num);
+            }
+        }
+    }
+
+    function checkStructs(ls, bk, v) {
+        let k, rs;
+        for (k = 0, rs = 1; k < 9; k++) {
+            if (ls[k].hasProb(v)) {
+                rs = 0;
+                break;
+            }
+        }
+        if (rs === 1) {
+            bk.val(v, 'S-assign');
+            this.__cleanProb(bk.pos(), bk.val());
+        }
+    }
+};
+
+Sudoku.prototype.exclude = function() {
+    for (let i = 0; i < 9; i++) {
+        let rl = this._rows[i],
+            cl = this._cols[i],
+            sl = this._sqrs[i];
+        // TODO
+    }
+};
+
 // {rows index, cols index, sqrs index}, value
 // 根据给定的数值v，清除对应的行row、列col和九宫格sqr里面的格子的可能值
 Sudoku.prototype.__cleanProb = function({row, col, sqr}, v) {
